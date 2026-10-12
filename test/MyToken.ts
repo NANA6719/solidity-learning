@@ -2,6 +2,7 @@ import hre from "hardhat";
 import { expect } from "chai";
 import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { extendConfig } from "hardhat/config";
 
 const mintingAmount = 100n;
 const decimals = 18n;
@@ -40,15 +41,24 @@ describe("mytoken deploy", () => {
         expect(await myTokenC.balanceOf(signer0)).equal(mintingAmount*10n**decimals);
     });
   })
-  
+
   describe("Transfer", () => {
     it("shoud have 0.5MT", async () => {
+        const signer0 = signers[0]
         const signer1 = signers[1];
-        await myTokenC.transfer(hre.ethers.parseUnits("0.5", decimals), signer1.address);
+        await expect(
+            myTokenC.transfer(
+            hre.ethers.parseUnits("0.5", decimals), 
+            signer1.address
+        )).to.emit(myTokenC, "Transfer").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("0.5", decimals));
+
+
         expect(await myTokenC.balanceOf(signer1)).equal(
             hre.ethers.parseUnits("0.5", decimals)
         );
+
     });
+
     it("shoud be reverted with insufficient balance error", async () => {
         const signer1 = signers[1];
         await expect(
