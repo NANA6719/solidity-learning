@@ -2,7 +2,6 @@ import hre from "hardhat";
 import { expect } from "chai";
 import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { extendConfig } from "hardhat/config";
 
 const mintingAmount = 100n;
 const decimals = 18n;
@@ -67,4 +66,20 @@ describe("mytoken deploy", () => {
     });
   })
 
+  describe("TransferFrom", () => {
+    it("shoud emit Approval event", async () => {
+        const signer0 = signers[0];
+        const signer1 = signers[1];
+        await expect(myTokenC.approve(signer1, hre.ethers.parseUnits("10", decimals))).to.emit(myTokenC, "Approval").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("10", decimals));
+
+    })
+    it("shoud be reverted with insufficient allowance error", async () => {
+        const signer0 = signers[0];
+        const signer1 = signers[1];
+        await expect(
+            myTokenC.connect(signer1).transferFrom(signer0.address, signer1.address, hre.ethers.parseUnits("11", decimals))
+        ).to.be.revertedWith("insufficient allowance");
+    })
+    
+  });
 });
