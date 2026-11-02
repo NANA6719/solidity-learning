@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { DECIMALS, MINTING_AMOUNT } from "./constant";
 import { MyToken, TinyBank } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import MyToken from "../ignition/modules/MyToken";
 
 describe("TinyBank", () => {
   let signers: HardhatEthersSigner[];
@@ -76,5 +75,14 @@ describe("TinyBank", () => {
         hre.ethers.parseUnits((BLOCKS + MINTING_AMOUNT + 1n).toString())
       );
     });
+    
+    it("Should revert when changing rewardPerBlock by hacker", async () => {
+      const hacker = signers[3];
+      const rewardToChange = hre.ethers.parseUnits("10000", DECIMALS);
+      await expect(
+        tinyBankC.connect(hacker).setRewardPerBlock(rewardToChange)
+      ).to.be.revertedWith("You are not authorized to manage this contract");
+    });
   });
 });
+
