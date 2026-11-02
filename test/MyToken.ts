@@ -115,13 +115,6 @@ describe("mytoken deploy", () => {
 
       const before0 = await myTokenC.balanceOf(signer0);
       const before1 = await myTokenC.balanceOf(signer1);
-      console.log(
-        "before: signer0 =",
-        hre.ethers.formatUnits(before0, DECIMALS),
-        "MT, signer1 =",
-        hre.ethers.formatUnits(before1, DECIMALS),
-        "MT"
-      );
 
       // signer0 이 signer1 에게 5MT 사용 권한 부여
       await expect(myTokenC.approve(signer1, amount))
@@ -139,13 +132,6 @@ describe("mytoken deploy", () => {
 
       const after0 = await myTokenC.balanceOf(signer0);
       const after1 = await myTokenC.balanceOf(signer1);
-      console.log(
-        "after:  signer0 =",
-        hre.ethers.formatUnits(after0, DECIMALS),
-        "MT, signer1 =",
-        hre.ethers.formatUnits(after1, DECIMALS),
-        "MT"
-      );
 
       expect(after0).equal(before0 - amount);
       expect(after1).equal(before1 + amount);
