@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-const mintingAmount = 100n;
-const decimals = 18n;
+const MINTING_AMOUNT = 100n;
+const DECIMALS = 18n;
 
 describe("mytoken deploy", () => {
   let myTokenC: MyToken;
@@ -14,8 +14,8 @@ describe("mytoken deploy", () => {
     myTokenC = await hre.ethers.deployContract("MyToken", [
       "MyToken",
       "MT",
-      decimals,
-      mintingAmount,
+      DECIMALS,
+      MINTING_AMOUNT,
     ]);
   });
   describe("Basic state value check", ()=> {
@@ -26,10 +26,10 @@ describe("mytoken deploy", () => {
         expect(await myTokenC.symbol()).equal("MT");
     });
     it("should return decimals", async () => {
-        expect(await myTokenC.decimals()).equal(decimals);
+        expect(await myTokenC.decimals()).equal(DECIMALS);
     });
     it("should return 100 totalSupply", async () => {
-        expect(await myTokenC.totalSupply()).equal(mintingAmount*10n**decimals);
+        expect(await myTokenC.totalSupply()).equal(MINTING_AMOUNT*10n**DECIMALS);
     });
   })
 
@@ -37,7 +37,7 @@ describe("mytoken deploy", () => {
   describe("Mint", () => {
     it("should return 100MT balance for signer 0", async () => {
         const signer0 = signers[0];
-        expect(await myTokenC.balanceOf(signer0)).equal(mintingAmount*10n**decimals);
+        expect(await myTokenC.balanceOf(signer0)).equal(MINTING_AMOUNT*10n**DECIMALS);
     });
   })
 
@@ -47,13 +47,13 @@ describe("mytoken deploy", () => {
         const signer1 = signers[1];
         await expect(
             myTokenC.transfer(
-            hre.ethers.parseUnits("0.5", decimals), 
+            hre.ethers.parseUnits("0.5", DECIMALS), 
             signer1.address
-        )).to.emit(myTokenC, "Transfer").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("0.5", decimals));
+        )).to.emit(myTokenC, "Transfer").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("0.5", DECIMALS));
 
 
         expect(await myTokenC.balanceOf(signer1)).equal(
-            hre.ethers.parseUnits("0.5", decimals)
+            hre.ethers.parseUnits("0.5", DECIMALS)
         );
 
     });
@@ -61,7 +61,7 @@ describe("mytoken deploy", () => {
     it("shoud be reverted with insufficient balance error", async () => {
         const signer1 = signers[1];
         await expect(
-        myTokenC.transfer(hre.ethers.parseUnits((mintingAmount + 1n).toString(), decimals), signer1.address)
+        myTokenC.transfer(hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS), signer1.address)
         ).to.be.revertedWith("insufficient balance");
     });
   })
@@ -70,24 +70,24 @@ describe("mytoken deploy", () => {
     it("shoud emit Approval event", async () => {
         const signer0 = signers[0];
         const signer1 = signers[1];
-        await expect(myTokenC.approve(signer1, hre.ethers.parseUnits("10", decimals))).to.emit(myTokenC, "Approval").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("10", decimals));
+        await expect(myTokenC.approve(signer1, hre.ethers.parseUnits("10", DECIMALS))).to.emit(myTokenC, "Approval").withArgs(signer0.address, signer1.address, hre.ethers.parseUnits("10", DECIMALS));
 
     })
     it("shoud be reverted with insufficient allowance error", async () => {
         const signer0 = signers[0];
         const signer1 = signers[1];
         await expect(
-            myTokenC.connect(signer1).transferFrom(signer0.address, signer1.address, hre.ethers.parseUnits("11", decimals))
+            myTokenC.connect(signer1).transferFrom(signer0.address, signer1.address, hre.ethers.parseUnits("11", DECIMALS))
         ).to.be.revertedWith("insufficient allowance");
     })
     it("should approve and transferFrom signer0 to signer1", async () => {
         const signer0 = signers[0];
         const signer1 = signers[1];
-        const amount = hre.ethers.parseUnits("5", decimals);
+        const amount = hre.ethers.parseUnits("5", DECIMALS);
 
         const before0 = await myTokenC.balanceOf(signer0);
         const before1 = await myTokenC.balanceOf(signer1);
-        console.log("before: signer0 =", hre.ethers.formatUnits(before0, decimals), "MT, signer1 =", hre.ethers.formatUnits(before1, decimals), "MT");
+        console.log("before: signer0 =", hre.ethers.formatUnits(before0, DECIMALS), "MT, signer1 =", hre.ethers.formatUnits(before1, DECIMALS), "MT");
 
         // signer0 이 signer1 에게 5MT 사용 권한 부여
         await expect(myTokenC.approve(signer1, amount))
@@ -101,7 +101,7 @@ describe("mytoken deploy", () => {
 
         const after0 = await myTokenC.balanceOf(signer0);
         const after1 = await myTokenC.balanceOf(signer1);
-        console.log("after:  signer0 =", hre.ethers.formatUnits(after0, decimals), "MT, signer1 =", hre.ethers.formatUnits(after1, decimals), "MT");
+        console.log("after:  signer0 =", hre.ethers.formatUnits(after0, DECIMALS), "MT, signer1 =", hre.ethers.formatUnits(after1, DECIMALS), "MT");
 
         expect(after0).equal(before0 - amount);
         expect(after1).equal(before1 + amount);
